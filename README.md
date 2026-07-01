@@ -1,3 +1,11 @@
+Setup:
+```
+conda create -n mvinverse_all python=3.11
+conda activate mvinverse_all
+pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+pip install opencv-python huggingface_hub safetensors
+```
+
 <h1 align="center">MVInverse: Feed-forward Multi-view Inverse Rendering in Seconds</h1>
 
 <p align="center">

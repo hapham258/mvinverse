@@ -35,3 +35,4 @@ release_weight.py
 /training/logs
 /datasets
 /commands.sh
+examples/Infinigen_IVR/*
