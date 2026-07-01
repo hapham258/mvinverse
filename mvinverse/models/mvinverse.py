@@ -159,10 +159,19 @@ class MVInverse(nn.Module, PyTorchModelHubMixin):
 
         normal_normalized = F.normalize(normal, p=2, dim=-1, eps=1e-8)
 
+        # Reconstruct the image
+        recon = albedo * shading
+        imgs_hwc = imgs.permute(0, 1, 3, 4, 2)   # B,V,H,W,C
+        residual = imgs_hwc - recon
+        pos_res = torch.clamp(residual, min=0.0)
+        neg_res = torch.clamp(-residual, min=0.0)
+
         return {
             "albedo": albedo,
             "roughness": roughness,
             "metallic": metallic,
             "normal": normal_normalized,
             "shading": shading,
+            "pos_res": pos_res,
+            "neg_res": neg_res,
         }

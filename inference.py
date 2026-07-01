@@ -99,6 +99,8 @@ if __name__ == '__main__':
     roughness_list = []
     normal_list = []
     shading_list = []
+    positive_residual_list = []
+    negative_residual_list = []
 
     # Run inference
     print("Running model inference...")
@@ -112,18 +114,24 @@ if __name__ == '__main__':
             roughness = res["roughness"][0]  # [N, H, W, 1]
             normal = res["normal"][0]  # [N, H, W, 3]
             shading = res["shading"][0]  # [N, H, W, 3]
+            positive_residual = res["pos_res"][0]  # [N, H, W, 3]
+            negative_residual = res["neg_res"][0]  # [N, H, W, 3]
 
             albedo_list.append(albedo)
             metallic_list.append(metallic)
             roughness_list.append(roughness)
             normal_list.append(normal)
             shading_list.append(shading)
+            positive_residual_list.append(positive_residual)
+            negative_residual_list.append(negative_residual)
 
     albedo = torch.concat(albedo_list, dim=0)
     metallic = torch.concat(metallic_list, dim=0)
     roughness = torch.concat(roughness_list, dim=0)
     normal = torch.concat(normal_list, dim=0)
     shading = torch.concat(shading_list, dim=0)
+    positive_residual = torch.concat(positive_residual_list, dim=0)
+    negative_residual = torch.concat(negative_residual_list, dim=0)
 
     # Save results
     save_dir = os.path.join(args.save_path, os.path.basename(args.data_path.rstrip('/')))
@@ -150,3 +158,11 @@ if __name__ == '__main__':
         shading_frame = Image.fromarray((shading[idx].cpu().numpy() * 255).astype(np.uint8))
         shading_path = os.path.join(save_dir, f"{idx:03d}_shading.png")
         shading_frame.save(shading_path)
+
+        positive_residual_frame = Image.fromarray((positive_residual[idx].cpu().numpy() * 255).astype(np.uint8))
+        positive_residual_path = os.path.join(save_dir, f"{idx:03d}_positive_residual.png")
+        positive_residual_frame.save(positive_residual_path)
+
+        negative_residual_frame = Image.fromarray((negative_residual[idx].cpu().numpy() * 255).astype(np.uint8))
+        negative_residual_path = os.path.join(save_dir, f"{idx:03d}_negative_residual.png")
+        negative_residual_frame.save(negative_residual_path)
