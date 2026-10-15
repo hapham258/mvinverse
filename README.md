@@ -7,7 +7,9 @@ pip install opencv-python huggingface_hub safetensors
 ```
 Infer:
 ```
-python inference.py --data_path /media/hapq/TDATA/TartanAir/abandonedfactory/Easy/P000/image_left --save_path /media/hapq/EXTRA_DATA/tartanair_stuff/abandonedfactory/Easy/P000/albedo_left
+./scripts/gen_tartanair_albedo.sh
+./scripts/gen_flyingchairs_albedo.sh
+./scripts/gen_flyingthings_albedo.sh
 ```
 
 <h1 align="center">MVInverse: Feed-forward Multi-view Inverse Rendering in Seconds</h1>
