@@ -5,6 +5,10 @@ conda activate mvinverse_all
 pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu128
 pip install opencv-python huggingface_hub safetensors
 ```
+Infer:
+```
+python inference.py --data_path /media/hapq/TDATA/TartanAir/abandonedfactory/Easy/P000/image_left --save_path /media/hapq/EXTRA_DATA/tartanair_stuff/abandonedfactory/Easy/P000/albedo_left
+```
 
 <h1 align="center">MVInverse: Feed-forward Multi-view Inverse Rendering in Seconds</h1>
 

@@ -93,76 +93,28 @@ if __name__ == '__main__':
         if args.num_frames > 0:
             imgs = imgs[:args.num_frames]
         print(f"Loaded {len(imgs)} images, size is {imgs.shape[-2:]}")
-
     albedo_list = []
-    metallic_list = []
-    roughness_list = []
-    normal_list = []
-    shading_list = []
-    positive_residual_list = []
-    negative_residual_list = []
 
-    # Run inference
+    # Run inference in chunks
     print("Running model inference...")
+    chunk_size = 8
     with torch.no_grad():
-        with torch.amp.autocast('cuda', dtype=torch.float16):
-            inference_imgs = imgs
-            res = model(inference_imgs[None]) # Add batch dimension
-
-            albedo = res["albedo"][0]  # [N, H, W, 3]
-            metallic = res["metallic"][0]  # [N, H, W, 1]
-            roughness = res["roughness"][0]  # [N, H, W, 1]
-            normal = res["normal"][0]  # [N, H, W, 3]
-            shading = res["shading"][0]  # [N, H, W, 3]
-            positive_residual = res["pos_res"][0]  # [N, H, W, 3]
-            negative_residual = res["neg_res"][0]  # [N, H, W, 3]
-
-            albedo_list.append(albedo)
-            metallic_list.append(metallic)
-            roughness_list.append(roughness)
-            normal_list.append(normal)
-            shading_list.append(shading)
-            positive_residual_list.append(positive_residual)
-            negative_residual_list.append(negative_residual)
-
-    albedo = torch.concat(albedo_list, dim=0)
-    metallic = torch.concat(metallic_list, dim=0)
-    roughness = torch.concat(roughness_list, dim=0)
-    normal = torch.concat(normal_list, dim=0)
-    shading = torch.concat(shading_list, dim=0)
-    positive_residual = torch.concat(positive_residual_list, dim=0)
-    negative_residual = torch.concat(negative_residual_list, dim=0)
+        for start in range(0, len(imgs), chunk_size):
+            inference_imgs = imgs[start:start + chunk_size]
+            with torch.amp.autocast('cuda', dtype=torch.float16, enabled=device.type == 'cuda'):
+                res = model(inference_imgs[None])
+            albedo_list.append(res["albedo"][0].cpu())
+            del res
+            print(f"Processed {min(start + chunk_size, len(imgs))}/{len(imgs)} frames", flush=True)
+    albedo = torch.cat(albedo_list, dim=0)
 
     # Save results
-    save_dir = os.path.join(args.save_path, os.path.basename(args.data_path.rstrip('/')))
+    save_dir = args.save_path
     os.makedirs(save_dir, exist_ok=True)
     print(f"Results saved to {save_dir}")
-
+    filenames = sorted([x for x in os.listdir(args.data_path) if x.lower().endswith(('.png', '.jpg', '.jpeg'))])
+    if args.num_frames > 0:
+        filenames = filenames[:args.num_frames]
     for idx, albedo_frame in enumerate(albedo):
-        albedo_frame = Image.fromarray((albedo_frame.cpu().numpy() * 255).astype(np.uint8))
-        albedo_path = os.path.join(save_dir, f"{idx:03d}_albedo.png")
-        albedo_frame.save(albedo_path)
-
-        metallic_frame = Image.fromarray((metallic[idx].squeeze(-1).cpu().numpy() * 255).astype(np.uint8))
-        metallic_path = os.path.join(save_dir, f"{idx:03d}_metallic.png")
-        metallic_frame.save(metallic_path)
-
-        roughness_frame = Image.fromarray((roughness[idx].squeeze(-1).cpu().numpy() * 255).astype(np.uint8))
-        roughness_path = os.path.join(save_dir, f"{idx:03d}_roughness.png")
-        roughness_frame.save(roughness_path)
-
-        normal_frame = Image.fromarray(((normal[idx]*0.5+0.5).cpu().numpy() * 255).astype(np.uint8))
-        normal_path = os.path.join(save_dir, f"{idx:03d}_normal.png")
-        normal_frame.save(normal_path)
-
-        shading_frame = Image.fromarray((shading[idx].cpu().numpy() * 255).astype(np.uint8))
-        shading_path = os.path.join(save_dir, f"{idx:03d}_shading.png")
-        shading_frame.save(shading_path)
-
-        positive_residual_frame = Image.fromarray((positive_residual[idx].cpu().numpy() * 255).astype(np.uint8))
-        positive_residual_path = os.path.join(save_dir, f"{idx:03d}_positive_residual.png")
-        positive_residual_frame.save(positive_residual_path)
-
-        negative_residual_frame = Image.fromarray((negative_residual[idx].cpu().numpy() * 255).astype(np.uint8))
-        negative_residual_path = os.path.join(save_dir, f"{idx:03d}_negative_residual.png")
-        negative_residual_frame.save(negative_residual_path)
+        albedo_frame = Image.fromarray((albedo_frame.cpu().numpy() * 255).clip(0, 255).astype(np.uint8))
+        albedo_frame.save(osp.join(save_dir, filenames[idx]))
