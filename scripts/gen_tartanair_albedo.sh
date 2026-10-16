@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-DATA_ROOT="/media/hapq/TDATA/TartanAir"
-OUTPUT_ROOT="/media/hapq/EXTRA_DATA/tartanair_stuff/TartanAir_extra"
-SCRIPT="$HOME/mvinverse/inference.py"
+DATA_ROOT="/mnt/data/hapq/TRAINING_DATA/TartanAir"
+OUTPUT_ROOT="/mnt/data/hapq/TRAINING_DATA/TartanAir_extra"
+SCRIPT="/mnt/data/hapq/mvinverse/inference.py"
 
 for scene in "$DATA_ROOT"/*/; do
     for difficulty in "$scene"*/; do

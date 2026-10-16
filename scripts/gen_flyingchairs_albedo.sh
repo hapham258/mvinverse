@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-DATA_ROOT="/media/hapq/TRAINING_DATA/FlyingChairs/FlyingChairs_release/data"
-OUTPUT_ROOT="/media/hapq/EXTRA_DATA/flyingchairs_stuff/FlyingChairs_extra"
-SCRIPT="$HOME/mvinverse/inference.py"
+DATA_ROOT="/mnt/data/hapq/TRAINING_DATA/FlyingChairs/FlyingChairs_release/data"
+OUTPUT_ROOT="/mnt/data/hapq/TRAINING_DATA/FlyingChairs_extra"
+SCRIPT="/mnt/data/hapq/mvinverse/inference.py"
 
 for suffix in img1 img2; do
     image_dir=$(mktemp -d)
