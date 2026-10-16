@@ -96,6 +96,11 @@ if __name__ == '__main__':
     with torch.no_grad():
         for start in range(0, len(filenames), chunk_size):
             batch_names = filenames[start:start + chunk_size]
+            original_sizes = []
+            for name in batch_names:
+                with Image.open(osp.join(args.data_path, name)) as img:
+                    original_sizes.append(img.size)
+
             imgs = torch.stack([
                 preprocess_image(osp.join(args.data_path, name))
                 for name in batch_names
@@ -107,10 +112,11 @@ if __name__ == '__main__':
             albedo = res["albedo"][0].cpu()
             del res, imgs
 
-            for filename, albedo_frame in zip(batch_names, albedo):
+            for filename, albedo_frame, original_size in zip(batch_names, albedo, original_sizes):
                 albedo_frame = Image.fromarray(
                     (albedo_frame.numpy() * 255).clip(0, 255).astype(np.uint8)
                 )
+                albedo_frame = albedo_frame.resize(original_size, Image.Resampling.LANCZOS)
                 output_name = osp.splitext(filename)[0] + '.png'
                 albedo_frame.save(osp.join(save_dir, output_name))
 
