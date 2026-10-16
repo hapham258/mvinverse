@@ -36,3 +36,4 @@ release_weight.py
 /datasets
 /commands.sh
 examples/Infinigen_IVR/*
+slurm_logs/
